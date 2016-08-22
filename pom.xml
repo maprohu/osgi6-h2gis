@@ -19,11 +19,68 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xs
                     <instructions>
                         <Embed-Dependency>*;scope=compile|runtime</Embed-Dependency>
                         <Embed-Transitive>true</Embed-Transitive>
-                        <Import-Package> !sun.*, !scala.reflect.*, * </Import-Package>
+                        <Export-Package>osgi6.h2gis</Export-Package>
+                        <Bundle-Activator>osgi6.h2gis.impl.H2GisActivator</Bundle-Activator>
+                        <Import-Package>
+                            !sun.*,
+                            !org.apache.lucene.*,
+                            !org.osgi.service.jdbc,
+                            !org.tukaani.xz,
+                            *
+                        </Import-Package>
                     </instructions>
                 </configuration>
             </plugin>
         </plugins>
     </build>
-    <dependencies> </dependencies>
+    <dependencies>
+        <dependency>
+            <groupId>org.scala-lang</groupId>
+            <artifactId>scala-library</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.scala-lang</groupId>
+            <artifactId>scala-reflect</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>osgi6</groupId>
+            <artifactId>osgi6-common</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>osgi6</groupId>
+            <artifactId>osgi6-actor</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>osgi6</groupId>
+            <artifactId>osgi6-akka-slf4j</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>osgi6</groupId>
+            <artifactId>osgi6-lib-multi</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>osgi6</groupId>
+            <artifactId>osgi6-lib-h2gis</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>osgi6</groupId>
+            <artifactId>osgi6-scalarx</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>osgi6</groupId>
+            <artifactId>osgi6-multi-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>servlet-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
+    </dependencies>
 </project>
