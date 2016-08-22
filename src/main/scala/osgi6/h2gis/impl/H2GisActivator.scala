@@ -23,7 +23,7 @@ import scala.concurrent.Future
 class H2GisActivator extends ActorSystemActivator(
   { ctx =>
     import ctx.actorSystem.dispatcher
-    ContextApiActivator.activateNonNull({ apiCtx =>
+    ContextApiActivator.activateNonNull(ContextApi.registry, { apiCtx =>
 
       val unset = H2GisActivator.activate(apiCtx)
 
