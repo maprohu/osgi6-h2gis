@@ -4,40 +4,52 @@ import java.io.File
 import javax.sql.DataSource
 
 import ogsi6.libs.h2gis.H2GisUtil
-import org.apache.commons.dbcp.BasicDataSource
 import org.h2.Driver
-import org.h2gis.h2spatialext.CreateSpatialExtension
-import osgi6.actor.ActorSystemActivator
-import osgi6.akka.slf4j.AkkaSlf4j
-import osgi6.common.{AsyncActivator, MultiActivator}
+import osgi6.common.BaseActivator
 import osgi6.h2gis.H2GisApi
 import osgi6.h2gis.H2GisApi.{ClosableDataSource, Provider}
-import osgi6.lib.multi.ContextApiActivator
-import osgi6.multi.api.{Context, ContextApi}
+import osgi6.multi.api.{Context, ContextApi, ContextApiTrait}
+import rx.Var
 
-import scala.concurrent.Future
 
 /**
   * Created by pappmar on 19/07/2016.
   */
-class H2GisActivator extends ActorSystemActivator(
+class H2GisActivator extends BaseActivator(
   { ctx =>
-    import ctx.actorSystem.dispatcher
-    ContextApiActivator.activateNonNull(ContextApi.registry, { apiCtx =>
+    val ctxRx = Var(Option.empty[Context])
 
-      val unset = H2GisActivator.activate(apiCtx)
-
-      { () =>
-        unset.remove
-
-        Driver.unload()
-
-        Future.successful()
+    val ctxReg = ContextApi.registry.listen(
+      new ContextApiTrait.Handler {
+        override def dispatch(ctx: Context): Unit = {
+          ctxRx() = Option(ctx)
+        }
       }
+    )
+
+    import rx.Ctx.Owner.Unsafe.Unsafe
+    val folded = ctxRx.fold(() => ())({ (removeOld, newCtx) =>
+      removeOld()
+
+      newCtx.map({ ctx =>
+        val unset = H2GisActivator.activate(ctx)
+
+        { () =>
+          unset.remove
+        }
+      }).getOrElse(() => ())
     })
-  },
-  Some(classOf[H2GisActivator].getClassLoader),
-  config = AkkaSlf4j.config
+
+    { () =>
+      ctxReg.remove
+
+      folded.kill()
+
+      Driver.unload()
+
+      ()
+    }
+  }
 )
 
 object H2GisActivator {
